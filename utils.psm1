@@ -121,7 +121,7 @@ function Install-VirtualAudio {
     Start-Process -FilePath "$PSScriptRoot\$wdk_installer" -ArgumentList "/S" -Wait
 
     $cert = "vb_cert.cer"
-    $url = "https://github.com/ecalder6/azure-gaming/raw/master/$cert"
+    $url = "https://github.com/archevel/azure-gaming/raw/master/$cert"
 
     Write-Output "Downloading vb certificate from $url"
     $webClient.DownloadFile($url, "$PSScriptRoot\$cert")
@@ -146,24 +146,22 @@ function Disable-IPv6To4 {
     Set-NetIsatapConfiguration -State disabled
 }
 
-function Install-VPN {
-    $cert = "zerotier_cert.cer"
-    $url = "https://github.com/ecalder6/azure-gaming/raw/master/$cert"
+function Install-VPN ($vpn_conf) {
 
-    Write-Output "Downloading zero tier certificate from $url"
-    $webClient.DownloadFile($url, "$PSScriptRoot\$cert")
-
-    Write-Output "Importing zero tier certificate"
-    Import-Certificate -FilePath "$PSScriptRoot\$cert" -CertStoreLocation "cert:\LocalMachine\TrustedPublisher"
-
-    Write-Output "Installing ZeroTier"
-    choco install zerotier-one --force
+    $z = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($vpn_conf))
+    Out-File -FilePath "$PSScriptRoot\client.ovpn" -InputObject "$z" 
+    
+    Write-Output "Installing openvpn"
+    choco install openvpn --force
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
 }
 
-function Join-Network ($network) {
-    Write-Output "Joining network $network"
-    zerotier-cli join $network
+function Join-Network ($vpn_auth) {
+    $z = [System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String($vpn_conf))
+    Out-File -FilePath "$PSScriptRoot\auth.txt" -InputObject "$z" 
+    
+    Write-Output "Joining network"
+    openvpn "$PSScriptRoot\client.ovpn" 
 }
 
 function Install-NSSM {
@@ -184,7 +182,7 @@ function Install-Steam {
 
 function Set-ScheduleWorkflow ($admin_username, $admin_password, $manual_install) {
     $script_name = "setup2.ps1"
-    $url = "https://raw.githubusercontent.com/ecalder6/azure-gaming/master/$script_name"
+    $url = "https://raw.githubusercontent.com/archevel/azure-gaming/master/$script_name"
 
     Write-Output "Downloading second stage setup script from $url"
     $webClient.DownloadFile($url, "C:\$script_name")

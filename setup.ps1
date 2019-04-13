@@ -1,5 +1,6 @@
 param (
-    [string]$network = "",
+    [string]$vpn_auth = "",
+    [string]$vpn_conf = "",
     [string]$admin_username = "",
     [string]$admin_password = "",
     [switch]$windows_update = $false,
@@ -7,7 +8,7 @@ param (
 )
 
 function Get-UtilsScript ($script_name) {
-    $url = "https://raw.githubusercontent.com/ecalder6/azure-gaming/master/$script_name"
+    $url = "https://raw.githubusercontent.com/archevel/azure-gaming/master/$script_name"
     Write-Host "Downloading utils script from $url"
     [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
@@ -33,8 +34,8 @@ if ($manual_install) {
 Add-DisconnectShortcut
 
 Install-Chocolatey
-Install-VPN
-Join-Network $network
+Install-VPN $vpn_conf
+Join-Network $vpn_auth
 Install-NSSM
 
 Install-NvidiaDriver $manual_install
