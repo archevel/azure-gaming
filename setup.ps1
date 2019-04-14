@@ -34,8 +34,8 @@ if ($manual_install) {
 Add-DisconnectShortcut
 
 Install-Chocolatey
-Install-VPN $vpn_conf
-Join-Network $vpn_auth
+# Install-VPN $vpn_conf
+# Join-Network $vpn_auth
 Install-NSSM
 
 Install-NvidiaDriver $manual_install
